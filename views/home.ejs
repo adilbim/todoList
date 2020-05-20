@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" type="text/css" href="../public/index.css"> -->
+    <title>Document</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Titillium+Web&display=swap');
+body{
+    font-family: 'Titillium Web', sans-serif;
+    background-color:#f4f4f4;
+    
+}
+.line_through{
+    text-decoration: line-through;
+}
+.container{
+    width: 50%;
+    margin: 0 auto;
+    height: 100vh;
+}
+input[type=text] {
+  border: none;
+  border-bottom: 2px solid black;
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #f4f4f4;
+}
+.header{
+    text-align: center;
+}
+span{
+    font-weight: 100;
+}
+
+h1{
+    font-size: -webkit-xxx-large;
+    margin-bottom: 0;
+}
+h3{
+    color: gray;
+}
+
+li{
+    display: flex;
+    justify-content: space-between;
+}
+
+</style>   
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+    <h1>todo<span>list</span></h1>
+    <h3>A simple todolist built with node</h3>
+    </div>
+    <input type="text" class="input" placeholder="Add your task here">
+    
+    <ul>
+      
+    </ul>
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js">
+    
+</script>
+<script> 
+
+
+//{method: "GET", url: "http://localhost:3000/todos/api", dataType: "json"}
+
+inputData();
+$(document).ready(function(){
+    
+    getData();
+    setTimeout(function(){
+$( "span" ).click(function() {
+   var bool = $(this).hasClass("line_through");
+   var id = "http://localhost:3000/todos/api/" + $( this ).parent().attr("id") ;
+   //$(this).css( "text-decoration", "line-through" );
+   completed(id,!bool);
+   $(this).toggleClass("line_through"); 
+   /////////////////////////////////
+  
+ }); },2000);
+
+ $(".fa").click(function(){
+    var id = "http://localhost:3000/todos/api/" + $(this).parent().attr('id');
+        console.log(id);
+    deleted(id);
+    $(this).parent().remove();
+    });
+
+});
+
+function completed(id,bool){
+    bool.toString();
+    $.ajax({
+     url: id,
+     type: 'PUT',
+     data:{ completed: bool}
+ });
+}
+
+function deleted(id)
+{
+    $.ajax({
+     url: id,
+     type: 'DELETE'
+    });
+}
+
+function getData()
+{var li = document.querySelector("ul");
+    $.get("http://localhost:3000/todos/api")
+.done(function(data){
+
+    data.forEach(function(elm){
+        
+        if(elm.completed === "true")
+        {
+            li.innerHTML += "<li "  + 'id="'+ elm.id + '">' +'<span class="line_through">'+ elm.name +'</span>'+'<i class="fa fa-trash" aria-hidden="true"></i></li>';
+        }
+        else if(elm.completed === "false")
+        { 
+            li.innerHTML += "<li " + 'id="'+ elm.id + '">'+'<span>'+ elm.name +'</span>'+'<i class="fa fa-trash" aria-hidden="true"></i></li>';
+        }
+    });
+    
+   
+
+    
+})
+.fail(function(err){
+    console.log(err);
+});
+}
+
+
+function inputData()
+{
+    $('input').keypress(function(event){
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if(keycode == '13'){
+        var text = document.querySelector('input').value;
+        $.post("http://localhost:3000/todos/api", {name: text})
+        .done(function(result){
+            //console.log(result); 
+            document.querySelector('input').value = ""; 
+            document.querySelector('ul').innerHTML += "<li " + 'id="'+ result.id + '">'+'<span>'+ result.name +'</span>'+'<i class="fa fa-trash" aria-hidden="true"></i></li>';
+            
+        })
+        .fail(function(err){
+            console.log(err);
+        })  ;
+
+    }
+});
+}
+
+</script>
+</body>
+</html>
